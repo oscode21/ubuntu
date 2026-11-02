@@ -23,8 +23,9 @@ The shell script can be run using: bash pr1_address_book.sh
 
 ============================================================ 1. ADDRESS
 BOOK USING SHELL SCRIPT
-============================================================ FILE:
-pr1_address_book.sh
+============================================================ 
+FILE:
+PR no.1
 
 SIMPLE DESCRIPTION: This shell script creates a small address book. It
 allows the user to create the address book, view saved records, insert a
@@ -134,8 +135,9 @@ done
 
 ============================================================ 2. FORK()
 AND WAIT() - PARENT AND CHILD PROCESS
-============================================================ FILE:
-pr2_fork_wait_process.c
+============================================================ 
+FILE:
+PR no. 2
 
 SIMPLE DESCRIPTION: This program demonstrates process creation using
 fork(). After fork(), two processes exist: - Child process sorts the
@@ -205,8 +207,9 @@ int main() { int a[50], n, i, j, temp; pid_t pid;
 
 ============================================================ 3.
 PRODUCER-CONSUMER PROBLEM
-============================================================ FILE:
-pr3_producer_consumer.c
+============================================================ 
+FILE:
+PR no. 3
 
 SIMPLE DESCRIPTION: The producer creates items and places them in a
 shared buffer. The consumer takes items from that buffer. Semaphores
@@ -282,8 +285,9 @@ int main() { pthread_t p, c;
 
 ============================================================ 4. DINING
 PHILOSOPHERS PROBLEM
-============================================================ FILE:
-pr4_dining_philosophers.c
+============================================================
+FILE:
+PR no. 4
 
 SIMPLE DESCRIPTION: Five philosophers sit around a table. Each
 philosopher needs two spoons (one on each side) to eat. Semaphores
@@ -343,7 +347,8 @@ int main() { pthread_t philosopher[5];
 
 ============================================================ 5. BANKER’S
 ALGORITHM ============================================================
-FILE: pr5_bankers_algorithm.c
+FILE: 
+PR no. 5
 
 SIMPLE DESCRIPTION: Banker’s Algorithm checks whether the system is in a
 safe state. It compares each process’s remaining resource need with the
@@ -415,8 +420,9 @@ int main() { int n = 5, m = 3; int alloc[5][3] = { {0, 1, 0}, {2, 0, 0},
 
 ============================================================ 6. FIFO
 CLIENT-SERVER COMMUNICATION
-============================================================ FILES: -
-pr6_fifo_server.c - pr6_fifo_client.c
+============================================================ 
+FILES: -
+PR no. 6
 
 SIMPLE DESCRIPTION: This practical uses two named pipes (FIFOs) to
 communicate between a client and a server. The client accepts text and
@@ -532,8 +538,9 @@ int main() { int fd, n; char buff[1024] = ““, line[256], result[1024];
 
 ============================================================ 7.
 PARENT-CHILD COMMUNICATION USING PIPES
-============================================================ FILE:
-pr7_parent_child_pipe.c
+============================================================ 
+FILE:
+PR no. 7
 
 SIMPLE DESCRIPTION: This program demonstrates communication between a
 parent and child process using two pipes. The parent sends a file path
@@ -614,8 +621,9 @@ ssize_t n; pid_t pid;
 
 ============================================================ 8. SCAN
 DISK SCHEDULING
-============================================================ FILE:
-pr8A_scan_disk_scheduling.c
+============================================================
+FILE:
+PR no. 8A
 
 SIMPLE DESCRIPTION: SCAN is also called the Elevator Algorithm. The disk
 head moves in one direction and services requests in order. It continues
@@ -686,8 +694,10 @@ current, total = 0;
 
 ============================================================ 9. SSTF
 DISK SCHEDULING
-============================================================ FILE:
-pr8B_sstf_disk_scheduling.c
+============================================================ 
+
+FILE:
+PR no. 8B
 
 SIMPLE DESCRIPTION: SSTF means Shortest Seek Time First. At every step,
 the disk head selects the pending request closest to its current
@@ -738,8 +748,9 @@ int main() { int RQ[100], done[100] = {0}; int n, head, total = 0, i;
 
 ============================================================ 10. C-LOOK
 DISK SCHEDULING
-============================================================ FILE:
-pr8C_clook_disk_scheduling.c
+============================================================ 
+FILE:
+PR no. 8C
 
 SIMPLE DESCRIPTION: C-LOOK means Circular LOOK. The disk head services
 requests in one direction only. After reaching the highest pending
