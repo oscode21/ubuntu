@@ -1,0 +1,818 @@
+OPERATING SYSTEMS PRACTICALS Combined Source Code and Simple
+Descriptions Repository: https://github.com/teitprec/os Branch: main
+
+============================================================ CONTENTS
+============================================================ 1. Address
+Book using Shell Script 2. fork() and wait() - Parent and Child Process
+3. Producer-Consumer Problem using Threads and Semaphores 4. Dining
+Philosophers Problem 5. Banker’s Algorithm 6. FIFO Client-Server
+Communication 7. Parent-Child Communication using Pipes 8. SCAN Disk
+Scheduling 9. SSTF Disk Scheduling 10. C-LOOK Disk Scheduling
+
+GENERAL COMPILATION NOTES
+
+C programs can generally be compiled using: gcc filename.c -o program
+
+Run using: ./program
+
+Programs using pthreads/semaphores should be compiled with: gcc
+filename.c -o program -pthread
+
+The FIFO client and server must be run in two separate terminal windows.
+The shell script can be run using: bash pr1_address_book.sh
+
+============================================================ 1. ADDRESS
+BOOK USING SHELL SCRIPT
+============================================================ FILE:
+pr1_address_book.sh
+
+SIMPLE DESCRIPTION: This shell script creates a small address book. It
+allows the user to create the address book, view saved records, insert a
+name and phone number, delete a record, modify a record, and exit.
+
+IMPORTANT COMMANDS: - touch: creates an empty file if it does not
+exist. - cat: displays file content. - grep: searches for a matching
+record. - awk: processes and updates records. - mv: replaces the old
+file with the updated temporary file.
+
+CODE:
+
+#!/bin/bash
+
+file=“addressbook.txt”
+
+while true do echo echo “===== ADDRESS BOOK =====” echo “1. Create
+Address Book” echo “2. View Address Book” echo “3. Insert Record” echo
+“4. Delete Record” echo “5. Modify Record” echo “6. Exit”
+
+    read -p "Enter choice: " ch
+
+    case "$ch" in
+
+        1)
+            touch "$file"
+            echo "Address Book Created"
+            ;;
+
+        2)
+            if [ -f "$file" ]; then
+                if [ -s "$file" ]; then
+                    echo "Name        Phone"
+                    echo "----------------------"
+                    cat "$file"
+                else
+                    echo "Address Book is Empty"
+                fi
+            else
+                echo "Address Book does not exist."
+            fi
+            ;;
+
+        3)
+            touch "$file"
+            read -p "Enter Name: " name
+            read -p "Enter Phone: " phone
+            echo "$name $phone" >> "$file"
+            echo "Record Inserted Successfully"
+            ;;
+
+        4)
+            if [ -f "$file" ]; then
+                read -p "Enter Name to Delete: " name
+
+                if grep -q "^$name " "$file"; then
+                    awk -v n="$name" '$1 != n' "$file" > temp.txt
+                    mv temp.txt "$file"
+                    echo "Record Deleted Successfully"
+                else
+                    echo "Record Not Found"
+                fi
+            else
+                echo "Address Book does not exist."
+            fi
+            ;;
+
+        5)
+            if [ -f "$file" ]; then
+                read -p "Enter Name to Modify: " oldname
+
+                if grep -q "^$oldname " "$file"; then
+                    read -p "Enter New Name: " newname
+                    read -p "Enter New Phone: " newphone
+
+                    awk -v old="$oldname" -v new="$newname" -v phone="$newphone" '
+                    BEGIN { OFS=" " }
+                    $1 == old {
+                        $1 = new
+                        $2 = phone
+                    }
+                    { print }
+                    ' "$file" > temp.txt
+
+                    mv temp.txt "$file"
+                    echo "Record Modified Successfully"
+                else
+                    echo "Record Not Found"
+                fi
+            else
+                echo "Address Book does not exist."
+            fi
+            ;;
+
+        6)
+            echo "Thank You!"
+            echo "Exiting Address Book..."
+            exit 0
+            ;;
+
+        *)
+            echo "Invalid Choice! Try Again."
+            ;;
+    esac
+
+done
+
+============================================================ 2. FORK()
+AND WAIT() - PARENT AND CHILD PROCESS
+============================================================ FILE:
+pr2_fork_wait_process.c
+
+SIMPLE DESCRIPTION: This program demonstrates process creation using
+fork(). After fork(), two processes exist: - Child process sorts the
+array in ascending order. - Parent process waits for the child using
+wait(), then sorts the parent’s own copy of the array in descending
+order.
+
+IMPORTANT FUNCTIONS: - fork(): creates a child process. - wait(NULL):
+makes the parent wait for a child process to finish. - pid == 0:
+identifies the child process. - pid > 0: identifies the parent process.
+
+CODE:
+
+#include <stdio.h> #include <stdlib.h> #include <unistd.h> #include
+<sys/wait.h>
+
+int main() { int a[50], n, i, j, temp; pid_t pid;
+
+    printf("Enter array size: ");
+    scanf("%d", &n);
+
+    printf("Enter %d numbers:\n", n);
+    for (i = 0; i < n; i++)
+        scanf("%d", &a[i]);
+
+    pid = fork();
+
+    if (pid == 0) {
+        /* Child: ascending order */
+        for (i = 0; i < n; i++)
+            for (j = i + 1; j < n; j++)
+                if (a[i] > a[j]) {
+                    temp = a[i];
+                    a[i] = a[j];
+                    a[j] = temp;
+                }
+
+        printf("____________child Process: _________");
+        printf("\nSort element in ascending orde\n");
+        for (i = 0; i < n; i++)
+            printf("%d ", a[i]);
+        printf("\n");
+    } else if (pid > 0) {
+        wait(NULL);
+
+        /* Parent: descending order */
+        for (i = 0; i < n; i++)
+            for (j = i + 1; j < n; j++)
+                if (a[i] < a[j]) {
+                    temp = a[i];
+                    a[i] = a[j];
+                    a[j] = temp;
+                }
+
+        printf("____________parent Process: _________");
+        printf("\nSort element in descending orde\n");
+        for (i = 0; i < n; i++)
+            printf("%d ", a[i]);
+        printf("\n");
+    } else {
+        printf("Fork failed\n");
+    }
+
+    return 0;
+
+}
+
+============================================================ 3.
+PRODUCER-CONSUMER PROBLEM
+============================================================ FILE:
+pr3_producer_consumer.c
+
+SIMPLE DESCRIPTION: The producer creates items and places them in a
+shared buffer. The consumer takes items from that buffer. Semaphores
+control whether the buffer is empty or full, and a mutex protects shared
+data from being accessed by both threads at the same time.
+
+IMPORTANT FUNCTIONS: - pthread_create(): creates a thread. -
+pthread_join(): waits for a thread to finish. - sem_wait():
+decreases/waits on a semaphore. - sem_post(): increases/signals a
+semaphore. - pthread_mutex_lock(): locks shared data. -
+pthread_mutex_unlock(): unlocks shared data.
+
+CODE:
+
+#include <stdio.h> #include <stdlib.h> #include <pthread.h> #include
+<semaphore.h> #include <unistd.h> #include <time.h>
+
+int buffer, count, pdelay, cdelay; sem_t empty, full; pthread_mutex_t
+mutex;
+
+void producer(void arg) { for (int i = 0; i < count; i++) { int item =
+rand() % 100 + 1;
+
+        sleep(pdelay);
+        sem_wait(&empty);
+        pthread_mutex_lock(&mutex);
+
+        buffer = item;
+        printf("Producer produced %d\n", item);
+        pthread_mutex_unlock(&mutex);
+        sem_post(&full);
+    }
+    return NULL;
+
+}
+
+void consumer(void arg) { for (int i = 0; i < count; i++) {
+sem_wait(&full); pthread_mutex_lock(&mutex);
+
+        printf("Consumer consumed %d\n", buffer);
+
+        pthread_mutex_unlock(&mutex);
+        sem_post(&empty);
+        sleep(cdelay);
+    }
+    return NULL;
+
+}
+
+int main() { pthread_t p, c;
+
+    printf("Enter number of items: ");
+    scanf("%d", &count);
+    printf("Enter producer delay: ");
+    scanf("%d", &pdelay);
+    printf("Enter consumer delay: ");
+    scanf("%d", &cdelay);
+    srand(time(NULL));
+
+    sem_init(&empty, 0, 1);
+    sem_init(&full, 0, 0);
+    pthread_mutex_init(&mutex, NULL);
+
+    pthread_create(&p, NULL, producer, NULL);
+    pthread_create(&c, NULL, consumer, NULL);
+
+    pthread_join(p, NULL);
+    pthread_join(c, NULL);
+
+    return 0;
+
+}
+
+============================================================ 4. DINING
+PHILOSOPHERS PROBLEM
+============================================================ FILE:
+pr4_dining_philosophers.c
+
+SIMPLE DESCRIPTION: Five philosophers sit around a table. Each
+philosopher needs two spoons (one on each side) to eat. Semaphores
+control access to spoons. The room semaphore allows only four
+philosophers to try to pick up spoons at the same time, helping prevent
+deadlock in this solution.
+
+IMPORTANT FUNCTIONS: - sem_init(): initializes a semaphore. -
+sem_wait(): waits until a resource is available. - sem_post(): releases
+a resource. - pthread_create(): creates philosopher threads. -
+pthread_join(): waits for threads to finish.
+
+CODE:
+
+#include <stdio.h> #include <pthread.h> #include <semaphore.h> #include
+<unistd.h>
+
+sem_t room, spoon[5];
+
+void phil(void arg) { int i = (int)(long)arg;
+
+    sem_wait(&room);
+    printf("Philosopher %d enters\n", i + 1);
+
+    sem_wait(&spoon[i]);
+    sem_wait(&spoon[(i + 1) % 5]);
+
+    printf("Philosopher %d is eating\n", i + 1);
+    sleep(2);
+
+    sem_post(&spoon[i]);
+    sem_post(&spoon[(i + 1) % 5]);
+
+    printf("Philosopher %d has finished eating\n\n", i + 1);
+    sem_post(&room);
+
+    return NULL;
+
+}
+
+int main() { pthread_t philosopher[5];
+
+    sem_init(&room, 0, 4);
+
+    for (int i = 0; i < 5; i++)
+        sem_init(&spoon[i], 0, 1);
+
+    for (int i = 0; i < 5; i++)
+        pthread_create(&philosopher[i], NULL, phil, (void *)(long)i);
+
+    for (int i = 0; i < 5; i++)
+        pthread_join(philosopher[i], NULL);
+
+    return 0;
+
+}
+
+============================================================ 5. BANKER’S
+ALGORITHM ============================================================
+FILE: pr5_bankers_algorithm.c
+
+SIMPLE DESCRIPTION: Banker’s Algorithm checks whether the system is in a
+safe state. It compares each process’s remaining resource need with the
+available resources. If a process can finish, its allocated resources
+are released and added back to the available resources. The program
+builds a safe sequence if all processes can finish.
+
+IMPORTANT TERMS: - Allocation: resources currently given to a process. -
+Max: maximum resources a process may need. - Need: remaining resources
+required (Max - Allocation). - Available: resources currently free. -
+Safe sequence: an order in which all processes can finish safely.
+
+CODE:
+
+// Banker’s Algorithm #include <stdio.h>
+
+int main() { int n = 5, m = 3; int alloc[5][3] = { {0, 1, 0}, {2, 0, 0},
+{3, 0, 2}, {2, 1, 1}, {0, 0, 2} };
+
+    int max[5][3] = {
+        {7, 5, 3},
+        {3, 2, 2},
+        {9, 0, 2},
+        {2, 2, 2},
+        {4, 3, 3}
+    };
+
+    int avail[3] = {3, 3, 2};
+    int need[5][3], finish[5] = {0}, safe[5];
+    int i, j, count = 0, found;
+
+    for (i = 0; i < n; i++)
+        for (j = 0; j < m; j++)
+            need[i][j] = max[i][j] - alloc[i][j];
+
+    while (count < n) {
+        found = 0;
+
+        for (i = 0; i < n; i++) {
+            if (finish[i] == 0) {
+                for (j = 0; j < m; j++)
+                    if (need[i][j] > avail[j])
+                        break;
+
+                if (j == m) {
+                    for (j = 0; j < m; j++)
+                        avail[j] += alloc[i][j];
+
+                    safe[count++] = i;
+                    finish[i] = 1;
+                    found = 1;
+                }
+            }
+        }
+
+        if (found == 0) {
+            printf("System is not in a safe state.\n");
+            return 0;
+        }
+    }
+
+    printf("System is in a safe state.\nSafe sequence: ");
+    for (i = 0; i < n; i++)
+        printf("P%d%s", safe[i], i == n - 1 ? "\n" : " -> ");
+
+    return 0;
+
+}
+
+============================================================ 6. FIFO
+CLIENT-SERVER COMMUNICATION
+============================================================ FILES: -
+pr6_fifo_server.c - pr6_fifo_client.c
+
+SIMPLE DESCRIPTION: This practical uses two named pipes (FIFOs) to
+communicate between a client and a server. The client accepts text and
+sends it to the server through myfifo1. The server counts characters,
+words, and lines, saves the result in opfile.txt, and sends the result
+back through myfifo2.
+
+RUNNING: 1. Compile both files: gcc pr6_fifo_server.c -o server gcc
+pr6_fifo_client.c -o client
+
+2.  Open terminal 1 and run: ./server
+
+3.  Open terminal 2 in the same directory and run: ./client
+
+4.  Type text in the client. Finish input with Ctrl+D.
+
+SERVER CODE:
+
+#include <stdio.h> #include <string.h> #include <unistd.h> #include
+<fcntl.h> #include <sys/stat.h> #include <ctype.h>
+
+int main() { int fd, n, chars = 0, words = 0, lines = 0, inside = 0;
+char buff[1024], result[1024];
+
+    mkfifo("myfifo1", 0666);
+    mkfifo("myfifo2", 0666);
+
+    fd = open("myfifo1", O_RDONLY);
+    n = read(fd, buff, sizeof(buff) - 1);
+    close(fd);
+
+    if (n <= 0)
+        return 1;
+
+    buff[n] = '\0';
+    printf("Data received from client:\n%s\n", buff);
+
+    for (int i = 0; i < n; i++) {
+        if (buff[i] != '\n')
+            chars++;
+
+        if (buff[i] == '\n')
+            lines++;
+
+        if (isspace((unsigned char)buff[i]))
+            inside = 0;
+        else if (!inside) {
+            words++;
+            inside = 1;
+        }
+    }
+
+    if (buff[n - 1] != '\n')
+        lines++;
+
+    FILE *fp = fopen("opfile.txt", "w");
+    fprintf(fp, "Characters: %d\nWords: %d\nLines: %d\n",
+            chars, words, lines);
+    fclose(fp);
+
+    fp = fopen("opfile.txt", "r");
+    n = fread(result, 1, sizeof(result) - 1, fp);
+    fclose(fp);
+    result[n] = '\0';
+
+    fd = open("myfifo2", O_WRONLY);
+    write(fd, result, strlen(result));
+    close(fd);
+
+    printf("Characters: %d\nWords: %d\nLines: %d\n", chars, words, lines);
+    printf("Result saved in opfile.txt and sent to client.\n");
+
+    return 0;
+
+}
+
+CLIENT CODE:
+
+#include <stdio.h> #include <string.h> #include <unistd.h> #include
+<fcntl.h> #include <sys/stat.h>
+
+int main() { int fd, n; char buff[1024] = ““, line[256], result[1024];
+
+    mkfifo("myfifo1", 0666);
+    mkfifo("myfifo2", 0666);
+
+    printf("Enter sentences (finish with Ctrl+D):\n");
+
+    while (fgets(line, sizeof(line), stdin) != NULL) {
+        if (strlen(buff) + strlen(line) >= sizeof(buff) - 1) {
+            printf("Input is too long.\n");
+            return 1;
+        }
+        strcat(buff, line);
+    }
+
+    fd = open("myfifo1", O_WRONLY);
+    write(fd, buff, strlen(buff));
+    close(fd);
+
+    fd = open("myfifo2", O_RDONLY);
+    n = read(fd, result, sizeof(result) - 1);
+    close(fd);
+
+    if (n > 0) {
+        result[n] = '\0';
+        printf("\nResult:\n%s", result);
+    }
+
+    return 0;
+
+}
+
+============================================================ 7.
+PARENT-CHILD COMMUNICATION USING PIPES
+============================================================ FILE:
+pr7_parent_child_pipe.c
+
+SIMPLE DESCRIPTION: This program demonstrates communication between a
+parent and child process using two pipes. The parent sends a file path
+to the child through the first pipe. The child opens and reads that
+file, then sends its contents back through the second pipe. The parent
+displays the received content.
+
+IMPORTANT FUNCTIONS: - pipe(): creates a communication channel. -
+fork(): creates the child process. - read(): receives data. - write():
+sends data. - close(): closes an unused pipe end. - wait(): makes the
+parent wait for the child.
+
+CODE:
+
+#include <stdio.h> #include <stdlib.h> #include <string.h> #include
+<unistd.h> #include <sys/wait.h>
+
+int main() { int pipe1[2], pipe2[2]; char path[256], buffer[1024];
+ssize_t n; pid_t pid;
+
+    if (pipe(pipe1) == -1 || pipe(pipe2) == -1) {
+        perror("pipe");
+        return 1;
+    }
+
+    printf("Enter file path: ");
+    fgets(path, sizeof(path), stdin);
+    path[strcspn(path, "\n")] = '\0';
+
+    pid = fork();
+
+    if (pid < 0) {
+        perror("fork");
+        return 1;
+    }
+
+    if (pid > 0) {                 /* Parent */
+        close(pipe1[0]);
+        close(pipe2[1]);
+
+        write(pipe1[1], path, strlen(path) + 1);
+        close(pipe1[1]);
+
+        printf("\nFile content:\n");
+        while ((n = read(pipe2[0], buffer, sizeof(buffer))) > 0)
+            write(STDOUT_FILENO, buffer, n);
+
+        close(pipe2[0]);
+        wait(NULL);
+    } else {                       /* Child */
+        close(pipe1[1]);
+        close(pipe2[0]);
+        n = read(pipe1[0], path, sizeof(path) - 1);
+        close(pipe1[0]);
+
+        if (n <= 0)
+            exit(1);
+
+        path[n] = '\0';
+
+        FILE *file = fopen(path, "r");
+        if (file == NULL) {
+            char message[] = "Could not open file.\n";
+            write(pipe2[1], message, strlen(message));
+        } else {
+            while ((n = fread(buffer, 1, sizeof(buffer), file)) > 0)
+                write(pipe2[1], buffer, n);
+
+            fclose(file);
+        }
+        close(pipe2[1]);
+        exit(0);
+    }
+
+    return 0;
+
+}
+
+============================================================ 8. SCAN
+DISK SCHEDULING
+============================================================ FILE:
+pr8A_scan_disk_scheduling.c
+
+SIMPLE DESCRIPTION: SCAN is also called the Elevator Algorithm. The disk
+head moves in one direction and services requests in order. It continues
+to the last cylinder in that direction, then reverses and services the
+remaining requests. This program first moves toward higher cylinder
+numbers.
+
+CODE:
+
+#include <stdio.h> #include <stdlib.h>
+
+int main() { int RQ[100], n, initial, size; int i, j, index = 0,
+current, total = 0;
+
+    printf("Enter number of requests: ");
+    scanf("%d", &n);
+
+    printf("Enter request sequence:\n");
+    for (i = 0; i < n; i++)
+        scanf("%d", &RQ[i]);
+
+    printf("Enter initial head position: ");
+    scanf("%d", &initial);
+
+    printf("Enter total disk size: ");
+    scanf("%d", &size);
+
+    /* Sort requests */
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            if (RQ[j] > RQ[j + 1]) {
+                int temp = RQ[j];
+                RQ[j] = RQ[j + 1];
+                RQ[j + 1] = temp;
+            }
+        }
+    }
+
+    /* Find first request at or above the head */
+    while (index < n && RQ[index] < initial)
+        index++;
+
+    current = initial;
+    printf("Seek sequence: %d", current);
+
+    /* Move toward higher cylinders */
+    for (i = index; i < n; i++) {
+        total += abs(RQ[i] - current);
+        current = RQ[i];
+        printf(" -> %d", current);
+    }
+
+    /* Go to the last cylinder, then reverse */
+    total += abs((size - 1) - current);
+    current = size - 1;
+    printf(" -> %d", current);
+
+    /* Serve remaining requests while moving lower */
+    for (i = index - 1; i >= 0; i--) {
+        total += abs(RQ[i] - current);
+        current = RQ[i];
+        printf(" -> %d", current);
+    }
+    printf("\nTotal head movement: %d\n", total);
+    return 0;
+
+}
+
+============================================================ 9. SSTF
+DISK SCHEDULING
+============================================================ FILE:
+pr8B_sstf_disk_scheduling.c
+
+SIMPLE DESCRIPTION: SSTF means Shortest Seek Time First. At every step,
+the disk head selects the pending request closest to its current
+position. It services that request and repeats until all requests are
+completed.
+
+CODE:
+
+#include <stdio.h> #include <stdlib.h>
+
+int main() { int RQ[100], done[100] = {0}; int n, head, total = 0, i;
+
+    printf("Enter the number of requests: ");
+    scanf("%d", &n);
+
+    printf("Enter the request sequence:\n");
+    for (i = 0; i < n; i++)
+        scanf("%d", &RQ[i]);
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    printf("Seek sequence: %d", head);
+
+    for (int count = 0; count < n; count++) {
+        int index = -1;
+        for (i = 0; i < n; i++) {
+            if (!done[i] &&
+                (index == -1 ||
+                 abs(RQ[i] - head) < abs(RQ[index] - head) ||
+                 (abs(RQ[i] - head) == abs(RQ[index] - head) &&
+                  RQ[i] > RQ[index]))) {
+                index = i;
+            }
+        }
+
+        total += abs(RQ[index] - head);
+        head = RQ[index];
+        done[index] = 1;
+
+        printf(" -> %d", head);
+    }
+
+    printf("\nTotal head movement: %d\n", total);
+    return 0;
+
+}
+
+============================================================ 10. C-LOOK
+DISK SCHEDULING
+============================================================ FILE:
+pr8C_clook_disk_scheduling.c
+
+SIMPLE DESCRIPTION: C-LOOK means Circular LOOK. The disk head services
+requests in one direction only. After reaching the highest pending
+request, it jumps to the lowest pending request and continues in the
+same direction. Unlike SCAN, it does not travel to the physical end of
+the disk.
+
+CODE:
+
+#include <stdio.h> #include <stdlib.h>
+
+int main() { int RQ[100], n, head, total = 0; int i, j, index = 0,
+current;
+
+    printf("Enter number of requests: ");
+    scanf("%d", &n);
+
+    printf("Enter request sequence:\n");
+    for (i = 0; i < n; i++)
+        scanf("%d", &RQ[i]);
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    /* Sort requests */
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            if (RQ[j] > RQ[j + 1]) {
+                int temp = RQ[j];
+                RQ[j] = RQ[j + 1];
+                RQ[j + 1] = temp;
+            }
+        }
+    }
+
+    /* First request at or above the head */
+    while (index < n && RQ[index] < head)
+        index++;
+
+    current = head;
+    printf("Seek sequence: %d", current);
+
+    /* Move toward higher requests */
+    for (i = index; i < n; i++) {
+        total += abs(RQ[i] - current);
+        current = RQ[i];
+        printf(" -> %d", current);
+    }
+
+    /* Jump to the lowest request, then continue upward */
+    if (index > 0) {
+        total += abs(current - RQ[0]);
+        current = RQ[0];
+        printf(" -> %d", current);
+
+        for (i = 1; i < index; i++) {
+            total += abs(RQ[i] - current);
+            current = RQ[i];
+            printf(" -> %d", current);
+        }
+    }
+
+    printf("\nTotal head movement: %d\n", total);
+    return 0;
+
+}
+
+============================================================ END OF
+DOCUMENT ============================================================
+
+SOURCE NOTE: The code sections above are combined from the public GitHub
+repository listed at the top. The descriptions are simplified
+explanations of what each program does. The source code is kept in
+separate sections; do not paste all C programs into one .c file because
+each has its own main() function. Compile and run each program
+separately.
