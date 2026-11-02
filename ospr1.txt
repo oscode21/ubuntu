@@ -1,50 +1,75 @@
-OPERATING SYSTEMS PRACTICALS Combined Source Code and Simple
-Descriptions Repository: https://github.com/teitprec/os Branch: main
+================================================================================
+  OPERATING SYSTEMS PRACTICALS 
+  Combined Source Code and Simple Descriptions
+================================================================================
+Repository: https://github.com/teitprec/os
+Branch: main
 
-============================================================ CONTENTS
-============================================================ 1. Address
-Book using Shell Script 2. fork() and wait() - Parent and Child Process
-3. Producer-Consumer Problem using Threads and Semaphores 4. Dining
-Philosophers Problem 5. Banker’s Algorithm 6. FIFO Client-Server
-Communication 7. Parent-Child Communication using Pipes 8. SCAN Disk
-Scheduling 9. SSTF Disk Scheduling 10. C-LOOK Disk Scheduling
+================================================================================
+  CONTENTS
+================================================================================
+1. Address Book using Shell Script
+2. fork() and wait() - Parent and Child Process
+3. Producer-Consumer Problem using Threads and Semaphores
+4. Dining Philosophers Problem
+5. Banker’s Algorithm
+6. FIFO Client-Server Communication
+7. Parent-Child Communication using Pipes
+8. SCAN Disk Scheduling
+9. SSTF Disk Scheduling
+10. C-LOOK Disk Scheduling
 
-GENERAL COMPILATION NOTES
+================================================================================
+  GENERAL COMPILATION NOTES
+================================================================================
+- C programs can generally be compiled using:
+  gcc filename.c -o program
 
-C programs can generally be compiled using: gcc filename.c -o program
+- Run using:
+  ./program
 
-Run using: ./program
+- Programs using pthreads/semaphores should be compiled with:
+  gcc filename.c -o program -pthread
 
-Programs using pthreads/semaphores should be compiled with: gcc
-filename.c -o program -pthread
+- The FIFO client and server must be run in two separate terminal windows.
 
-The FIFO client and server must be run in two separate terminal windows.
-The shell script can be run using: bash pr1_address_book.sh
+- The shell script can be run using:
+  bash pr1_address_book.sh
 
-============================================================ 1. ADDRESS
-BOOK USING SHELL SCRIPT
-============================================================ 
-FILE:
-PR no.1
 
-SIMPLE DESCRIPTION: This shell script creates a small address book. It
-allows the user to create the address book, view saved records, insert a
-name and phone number, delete a record, modify a record, and exit.
+================================================================================
+1. ADDRESS BOOK USING SHELL SCRIPT
+================================================================================
+FILE: PR no.1
 
-IMPORTANT COMMANDS: - touch: creates an empty file if it does not
-exist. - cat: displays file content. - grep: searches for a matching
-record. - awk: processes and updates records. - mv: replaces the old
-file with the updated temporary file.
+SIMPLE DESCRIPTION: 
+This shell script creates a small address book. It allows the user to create 
+the address book, view saved records, insert a name and phone number, delete 
+a record, modify a record, and exit.
+
+IMPORTANT COMMANDS: 
+- touch: creates an empty file if it does not exist.
+- cat: displays file content.
+- grep: searches for a matching record.
+- awk: processes and updates records.
+- mv: replaces the old file with the updated temporary file.
 
 CODE:
 
 #!/bin/bash
 
-file=“addressbook.txt”
+file="addressbook.txt"
 
-while true do echo echo “===== ADDRESS BOOK =====” echo “1. Create
-Address Book” echo “2. View Address Book” echo “3. Insert Record” echo
-“4. Delete Record” echo “5. Modify Record” echo “6. Exit”
+while true
+do
+    echo
+    echo "===== ADDRESS BOOK ====="
+    echo "1. Create Address Book"
+    echo "2. View Address Book"
+    echo "3. Insert Record"
+    echo "4. Delete Record"
+    echo "5. Modify Record"
+    echo "6. Exit"
 
     read -p "Enter choice: " ch
 
@@ -133,28 +158,35 @@ Address Book” echo “2. View Address Book” echo “3. Insert Record” echo
 
 done
 
-============================================================ 2. FORK()
-AND WAIT() - PARENT AND CHILD PROCESS
-============================================================ 
-FILE:
-PR no. 2
 
-SIMPLE DESCRIPTION: This program demonstrates process creation using
-fork(). After fork(), two processes exist: - Child process sorts the
-array in ascending order. - Parent process waits for the child using
-wait(), then sorts the parent’s own copy of the array in descending
-order.
+================================================================================
+2. FORK() AND WAIT() - PARENT AND CHILD PROCESS
+================================================================================
+FILE: PR no. 2
 
-IMPORTANT FUNCTIONS: - fork(): creates a child process. - wait(NULL):
-makes the parent wait for a child process to finish. - pid == 0:
-identifies the child process. - pid > 0: identifies the parent process.
+SIMPLE DESCRIPTION: 
+This program demonstrates process creation using fork(). After fork(), two 
+processes exist:
+- Child process sorts the array in ascending order.
+- Parent process waits for the child using wait(), then sorts the parent’s own 
+  copy of the array in descending order.
+
+IMPORTANT FUNCTIONS: 
+- fork(): creates a child process.
+- wait(NULL): makes the parent wait for a child process to finish.
+- pid == 0: identifies the child process.
+- pid > 0: identifies the parent process.
 
 CODE:
 
-#include <stdio.h> #include <stdlib.h> #include <unistd.h> #include
-<sys/wait.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
-int main() { int a[50], n, i, j, temp; pid_t pid;
+int main() {
+    int a[50], n, i, j, temp;
+    pid_t pid;
 
     printf("Enter array size: ");
     scanf("%d", &n);
@@ -176,7 +208,7 @@ int main() { int a[50], n, i, j, temp; pid_t pid;
                 }
 
         printf("____________child Process: _________");
-        printf("\nSort element in ascending orde\n");
+        printf("\nSort element in ascending order:\n");
         for (i = 0; i < n; i++)
             printf("%d ", a[i]);
         printf("\n");
@@ -193,7 +225,7 @@ int main() { int a[50], n, i, j, temp; pid_t pid;
                 }
 
         printf("____________parent Process: _________");
-        printf("\nSort element in descending orde\n");
+        printf("\nSort element in descending order:\n");
         for (i = 0; i < n; i++)
             printf("%d ", a[i]);
         printf("\n");
@@ -202,36 +234,44 @@ int main() { int a[50], n, i, j, temp; pid_t pid;
     }
 
     return 0;
-
 }
 
-============================================================ 3.
-PRODUCER-CONSUMER PROBLEM
-============================================================ 
-FILE:
-PR no. 3
 
-SIMPLE DESCRIPTION: The producer creates items and places them in a
-shared buffer. The consumer takes items from that buffer. Semaphores
-control whether the buffer is empty or full, and a mutex protects shared
-data from being accessed by both threads at the same time.
+================================================================================
+3. PRODUCER-CONSUMER PROBLEM
+================================================================================
+FILE: PR no. 3
 
-IMPORTANT FUNCTIONS: - pthread_create(): creates a thread. -
-pthread_join(): waits for a thread to finish. - sem_wait():
-decreases/waits on a semaphore. - sem_post(): increases/signals a
-semaphore. - pthread_mutex_lock(): locks shared data. -
-pthread_mutex_unlock(): unlocks shared data.
+SIMPLE DESCRIPTION: 
+The producer creates items and places them in a shared buffer. The consumer 
+takes items from that buffer. Semaphores control whether the buffer is empty or 
+full, and a mutex protects shared data from being accessed by both threads at 
+the same time.
+
+IMPORTANT FUNCTIONS: 
+- pthread_create(): creates a thread.
+- pthread_join(): waits for a thread to finish.
+- sem_wait(): decreases/waits on a semaphore.
+- sem_post(): increases/signals a semaphore.
+- pthread_mutex_lock(): locks shared data.
+- pthread_mutex_unlock(): unlocks shared data.
 
 CODE:
 
-#include <stdio.h> #include <stdlib.h> #include <pthread.h> #include
-<semaphore.h> #include <unistd.h> #include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+#include <time.h>
 
-int buffer, count, pdelay, cdelay; sem_t empty, full; pthread_mutex_t
-mutex;
+int buffer, count, pdelay, cdelay;
+sem_t empty, full;
+pthread_mutex_t mutex;
 
-void producer(void arg) { for (int i = 0; i < count; i++) { int item =
-rand() % 100 + 1;
+void *producer(void *arg) {
+    for (int i = 0; i < count; i++) {
+        int item = rand() % 100 + 1;
 
         sleep(pdelay);
         sem_wait(&empty);
@@ -243,11 +283,12 @@ rand() % 100 + 1;
         sem_post(&full);
     }
     return NULL;
-
 }
 
-void consumer(void arg) { for (int i = 0; i < count; i++) {
-sem_wait(&full); pthread_mutex_lock(&mutex);
+void *consumer(void *arg) {
+    for (int i = 0; i < count; i++) {
+        sem_wait(&full);
+        pthread_mutex_lock(&mutex);
 
         printf("Consumer consumed %d\n", buffer);
 
@@ -256,10 +297,10 @@ sem_wait(&full); pthread_mutex_lock(&mutex);
         sleep(cdelay);
     }
     return NULL;
-
 }
 
-int main() { pthread_t p, c;
+int main() {
+    pthread_t p, c;
 
     printf("Enter number of items: ");
     scanf("%d", &count);
@@ -279,35 +320,43 @@ int main() { pthread_t p, c;
     pthread_join(p, NULL);
     pthread_join(c, NULL);
 
-    return 0;
+    sem_destroy(&empty);
+    sem_destroy(&full);
+    pthread_mutex_destroy(&mutex);
 
+    return 0;
 }
 
-============================================================ 4. DINING
-PHILOSOPHERS PROBLEM
-============================================================
-FILE:
-PR no. 4
 
-SIMPLE DESCRIPTION: Five philosophers sit around a table. Each
-philosopher needs two spoons (one on each side) to eat. Semaphores
-control access to spoons. The room semaphore allows only four
-philosophers to try to pick up spoons at the same time, helping prevent
-deadlock in this solution.
+================================================================================
+4. DINING PHILOSOPHERS PROBLEM
+================================================================================
+FILE: PR no. 4
 
-IMPORTANT FUNCTIONS: - sem_init(): initializes a semaphore. -
-sem_wait(): waits until a resource is available. - sem_post(): releases
-a resource. - pthread_create(): creates philosopher threads. -
-pthread_join(): waits for threads to finish.
+SIMPLE DESCRIPTION: 
+Five philosophers sit around a table. Each philosopher needs two spoons (one 
+on each side) to eat. Semaphores control access to spoons. The room semaphore 
+allows only four philosophers to try to pick up spoons at the same time, helping 
+prevent deadlock in this solution.
+
+IMPORTANT FUNCTIONS: 
+- sem_init(): initializes a semaphore.
+- sem_wait(): waits until a resource is available.
+- sem_post(): releases a resource.
+- pthread_create(): creates philosopher threads.
+- pthread_join(): waits for threads to finish.
 
 CODE:
 
-#include <stdio.h> #include <pthread.h> #include <semaphore.h> #include
-<unistd.h>
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
 
 sem_t room, spoon[5];
 
-void phil(void arg) { int i = (int)(long)arg;
+void *phil(void *arg) {
+    int i = (int)(long)arg;
 
     sem_wait(&room);
     printf("Philosopher %d enters\n", i + 1);
@@ -325,10 +374,10 @@ void phil(void arg) { int i = (int)(long)arg;
     sem_post(&room);
 
     return NULL;
-
 }
 
-int main() { pthread_t philosopher[5];
+int main() {
+    pthread_t philosopher[5];
 
     sem_init(&room, 0, 4);
 
@@ -341,32 +390,41 @@ int main() { pthread_t philosopher[5];
     for (int i = 0; i < 5; i++)
         pthread_join(philosopher[i], NULL);
 
-    return 0;
+    sem_destroy(&room);
+    for (int i = 0; i < 5; i++)
+        sem_destroy(&spoon[i]);
 
+    return 0;
 }
 
-============================================================ 5. BANKER’S
-ALGORITHM ============================================================
-FILE: 
-PR no. 5
 
-SIMPLE DESCRIPTION: Banker’s Algorithm checks whether the system is in a
-safe state. It compares each process’s remaining resource need with the
-available resources. If a process can finish, its allocated resources
-are released and added back to the available resources. The program
-builds a safe sequence if all processes can finish.
+================================================================================
+5. BANKER’S ALGORITHM
+================================================================================
+FILE: PR no. 5
 
-IMPORTANT TERMS: - Allocation: resources currently given to a process. -
-Max: maximum resources a process may need. - Need: remaining resources
-required (Max - Allocation). - Available: resources currently free. -
-Safe sequence: an order in which all processes can finish safely.
+SIMPLE DESCRIPTION: 
+Banker’s Algorithm checks whether the system is in a safe state. It compares 
+each process’s remaining resource need with the available resources. If a 
+process can finish, its allocated resources are released and added back to the 
+available resources. The program builds a safe sequence if all processes can 
+finish.
+
+IMPORTANT TERMS: 
+- Allocation: resources currently given to a process.
+- Max: maximum resources a process may need.
+- Need: remaining resources required (Max - Allocation).
+- Available: resources currently free.
+- Safe sequence: an order in which all processes can finish safely.
 
 CODE:
 
-// Banker’s Algorithm #include <stdio.h>
+// Banker’s Algorithm
+#include <stdio.h>
 
-int main() { int n = 5, m = 3; int alloc[5][3] = { {0, 1, 0}, {2, 0, 0},
-{3, 0, 2}, {2, 1, 1}, {0, 0, 2} };
+int main() {
+    int n = 5, m = 3;
+    int alloc[5][3] = { {0, 1, 0}, {2, 0, 0}, {3, 0, 2}, {2, 1, 1}, {0, 0, 2} };
 
     int max[5][3] = {
         {7, 5, 3},
@@ -415,37 +473,42 @@ int main() { int n = 5, m = 3; int alloc[5][3] = { {0, 1, 0}, {2, 0, 0},
         printf("P%d%s", safe[i], i == n - 1 ? "\n" : " -> ");
 
     return 0;
-
 }
 
-============================================================ 6. FIFO
-CLIENT-SERVER COMMUNICATION
-============================================================ 
-FILES: -
-PR no. 6
 
-SIMPLE DESCRIPTION: This practical uses two named pipes (FIFOs) to
-communicate between a client and a server. The client accepts text and
-sends it to the server through myfifo1. The server counts characters,
-words, and lines, saves the result in opfile.txt, and sends the result
-back through myfifo2.
+================================================================================
+6. FIFO CLIENT-SERVER COMMUNICATION
+================================================================================
+FILES: PR no. 6
 
-RUNNING: 1. Compile both files: gcc pr6_fifo_server.c -o server gcc
-pr6_fifo_client.c -o client
+SIMPLE DESCRIPTION: 
+This practical uses two named pipes (FIFOs) to communicate between a client 
+and a server. The client accepts text and sends it to the server through 
+myfifo1. The server counts characters, words, and lines, saves the result in 
+opfile.txt, and sends the result back through myfifo2.
 
-2.  Open terminal 1 and run: ./server
-
-3.  Open terminal 2 in the same directory and run: ./client
-
-4.  Type text in the client. Finish input with Ctrl+D.
+RUNNING: 
+1. Compile both files: 
+   gcc pr6_fifo_server.c -o server
+   gcc pr6_fifo_client.c -o client
+2. Open terminal 1 and run: 
+   ./server
+3. Open terminal 2 in the same directory and run: 
+   ./client
+4. Type text in the client. Finish input with Ctrl+D.
 
 SERVER CODE:
 
-#include <stdio.h> #include <string.h> #include <unistd.h> #include
-<fcntl.h> #include <sys/stat.h> #include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <ctype.h>
 
-int main() { int fd, n, chars = 0, words = 0, lines = 0, inside = 0;
-char buff[1024], result[1024];
+int main() {
+    int fd, n, chars = 0, words = 0, lines = 0, inside = 0;
+    char buff[1024], result[1024];
 
     mkfifo("myfifo1", 0666);
     mkfifo("myfifo2", 0666);
@@ -496,15 +559,19 @@ char buff[1024], result[1024];
     printf("Result saved in opfile.txt and sent to client.\n");
 
     return 0;
-
 }
 
 CLIENT CODE:
 
-#include <stdio.h> #include <string.h> #include <unistd.h> #include
-<fcntl.h> #include <sys/stat.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
-int main() { int fd, n; char buff[1024] = ““, line[256], result[1024];
+int main() {
+    int fd, n;
+    char buff[1024] = "", line[256], result[1024];
 
     mkfifo("myfifo1", 0666);
     mkfifo("myfifo2", 0666);
@@ -533,33 +600,41 @@ int main() { int fd, n; char buff[1024] = ““, line[256], result[1024];
     }
 
     return 0;
-
 }
 
-============================================================ 7.
-PARENT-CHILD COMMUNICATION USING PIPES
-============================================================ 
-FILE:
-PR no. 7
 
-SIMPLE DESCRIPTION: This program demonstrates communication between a
-parent and child process using two pipes. The parent sends a file path
-to the child through the first pipe. The child opens and reads that
-file, then sends its contents back through the second pipe. The parent
-displays the received content.
+================================================================================
+7. PARENT-CHILD COMMUNICATION USING PIPES
+================================================================================
+FILE: PR no. 7
 
-IMPORTANT FUNCTIONS: - pipe(): creates a communication channel. -
-fork(): creates the child process. - read(): receives data. - write():
-sends data. - close(): closes an unused pipe end. - wait(): makes the
-parent wait for the child.
+SIMPLE DESCRIPTION: 
+This program demonstrates communication between a parent and child process using 
+two pipes. The parent sends a file path to the child through the first pipe. 
+The child opens and reads that file, then sends its contents back through the 
+second pipe. The parent displays the received content.
+
+IMPORTANT FUNCTIONS: 
+- pipe(): creates a communication channel.
+- fork(): creates the child process.
+- read(): receives data.
+- write(): sends data.
+- close(): closes an unused pipe end.
+- wait(): makes the parent wait for the child.
 
 CODE:
 
-#include <stdio.h> #include <stdlib.h> #include <string.h> #include
-<unistd.h> #include <sys/wait.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
-int main() { int pipe1[2], pipe2[2]; char path[256], buffer[1024];
-ssize_t n; pid_t pid;
+int main() {
+    int pipe1[2], pipe2[2];
+    char path[256], buffer[1024];
+    ssize_t n;
+    pid_t pid;
 
     if (pipe(pipe1) == -1 || pipe(pipe2) == -1) {
         perror("pipe");
@@ -616,27 +691,28 @@ ssize_t n; pid_t pid;
     }
 
     return 0;
-
 }
 
-============================================================ 8. SCAN
-DISK SCHEDULING
-============================================================
-FILE:
-PR no. 8A
 
-SIMPLE DESCRIPTION: SCAN is also called the Elevator Algorithm. The disk
-head moves in one direction and services requests in order. It continues
-to the last cylinder in that direction, then reverses and services the
-remaining requests. This program first moves toward higher cylinder
-numbers.
+================================================================================
+8. SCAN DISK SCHEDULING
+================================================================================
+FILE: PR no. 8A
+
+SIMPLE DESCRIPTION: 
+SCAN is also called the Elevator Algorithm. The disk head moves in one 
+direction and services requests in order. It continues to the last cylinder 
+in that direction, then reverses and services the remaining requests. This 
+program first moves toward higher cylinder numbers.
 
 CODE:
 
-#include <stdio.h> #include <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-int main() { int RQ[100], n, initial, size; int i, j, index = 0,
-current, total = 0;
+int main() {
+    int RQ[100], n, initial, size;
+    int i, j, index = 0, current, total = 0;
 
     printf("Enter number of requests: ");
     scanf("%d", &n);
@@ -689,26 +765,27 @@ current, total = 0;
     }
     printf("\nTotal head movement: %d\n", total);
     return 0;
-
 }
 
-============================================================ 9. SSTF
-DISK SCHEDULING
-============================================================ 
 
-FILE:
-PR no. 8B
+================================================================================
+9. SSTF DISK SCHEDULING
+================================================================================
+FILE: PR no. 8B
 
-SIMPLE DESCRIPTION: SSTF means Shortest Seek Time First. At every step,
-the disk head selects the pending request closest to its current
-position. It services that request and repeats until all requests are
-completed.
+SIMPLE DESCRIPTION: 
+SSTF means Shortest Seek Time First. At every step, the disk head selects the 
+pending request closest to its current position. It services that request and 
+repeats until all requests are completed.
 
 CODE:
 
-#include <stdio.h> #include <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-int main() { int RQ[100], done[100] = {0}; int n, head, total = 0, i;
+int main() {
+    int RQ[100], done[100] = {0};
+    int n, head, total = 0, i;
 
     printf("Enter the number of requests: ");
     scanf("%d", &n);
@@ -743,27 +820,28 @@ int main() { int RQ[100], done[100] = {0}; int n, head, total = 0, i;
 
     printf("\nTotal head movement: %d\n", total);
     return 0;
-
 }
 
-============================================================ 10. C-LOOK
-DISK SCHEDULING
-============================================================ 
-FILE:
-PR no. 8C
 
-SIMPLE DESCRIPTION: C-LOOK means Circular LOOK. The disk head services
-requests in one direction only. After reaching the highest pending
-request, it jumps to the lowest pending request and continues in the
-same direction. Unlike SCAN, it does not travel to the physical end of
-the disk.
+================================================================================
+10. C-LOOK DISK SCHEDULING
+================================================================================
+FILE: PR no. 8C
+
+SIMPLE DESCRIPTION: 
+C-LOOK means Circular LOOK. The disk head services requests in one direction 
+only. After reaching the highest pending request, it jumps to the lowest pending 
+request and continues in the same direction. Unlike SCAN, it does not travel to 
+the physical end of the disk.
 
 CODE:
 
-#include <stdio.h> #include <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-int main() { int RQ[100], n, head, total = 0; int i, j, index = 0,
-current;
+int main() {
+    int RQ[100], n, head, total = 0;
+    int i, j, index = 0, current;
 
     printf("Enter number of requests: ");
     scanf("%d", &n);
@@ -815,15 +893,15 @@ current;
 
     printf("\nTotal head movement: %d\n", total);
     return 0;
-
 }
 
-============================================================ END OF
-DOCUMENT ============================================================
 
-SOURCE NOTE: The code sections above are combined from the public GitHub
-repository listed at the top. The descriptions are simplified
-explanations of what each program does. The source code is kept in
-separate sections; do not paste all C programs into one .c file because
-each has its own main() function. Compile and run each program
-separately.
+================================================================================
+  END OF DOCUMENT
+================================================================================
+SOURCE NOTE: 
+The code sections above are combined from the public GitHub repository listed 
+at the top. The descriptions are simplified explanations of what each program 
+does. The source code is kept in separate sections; do not paste all C programs 
+into one .c file because each has its own main() function. Compile and run 
+each program separately.
